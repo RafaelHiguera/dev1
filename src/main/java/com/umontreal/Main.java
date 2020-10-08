@@ -142,6 +142,41 @@ public class Main {
 
     }
 
+    // [0] :  e – n + 2 ; [1] :  1 + d; [2] : r;
+    public int[] ccMcCabe(Scanner scanner){
+        int e = 0, n = 0, d = 0, r = 1;
+        while (scanner.hasNextLine()) {
+            String data = scanner.nextLine();
+            if(data == "" || data == " " || lineDoesNotContainLetters(data) || data.substring(0,2).equals("//"))
+                continue;
+            else if(data.substring(0,2).equals("/*")){
+                while(!data.contains("*/")){
+                    data = scanner.nextLine();
+                }
+                data = scanner.nextLine();
+            }
+            n++;
+            if(!data.contains("break") || !data.contains("default") || data.contains("else") || data.contains("continue"))
+                e++;
+            if(data.contains("if") || data.contains("else if") || data.contains("switch") || data.contains("case")){
+                e++;
+                d++;
+                r++;
+            }
+            if(!scanner.hasNextLine())
+                e--;
+        }
+
+    }
+
+    private boolean lineDoesNotContainLetters(String line){
+        for(char c : line.toCharArray()){
+            if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
+                return false;
+        }
+        return true;
+    }
+
 
     public static void extractMetric(File projectDir) throws FileNotFoundException {
         new DirExplorer((level, path, file) -> path.endsWith(".java"), (level, path, file) -> {
