@@ -1,10 +1,4 @@
 chemin,class,methode,methode_LOC,methode_CLOC,methode_DC
-src\main\java\com\umontreal\org\javaparser\examples\CommentReporter.java,CommentReporter,main_String[],8,11,1.375,
-src\main\java\com\umontreal\org\javaparser\examples\CommentReporter.java,CommentReportEntry,toString_,3,3,1.0,
-src\main\java\com\umontreal\org\javaparser\examples\ReversePolishNotation.java,ReversePolishNotation,calc_String,36,36,1.0,
-src\main\java\com\umontreal\org\javaparser\examples\ReversePolishNotation.java,ReversePolishNotation,memoryRecall_,8,8,1.0,
-src\main\java\com\umontreal\org\javaparser\examples\ReversePolishNotation.java,ReversePolishNotation,memoryClear_,7,8,1.1428572,
-src\main\java\com\umontreal\org\javaparser\examples\ReversePolishNotation.java,ReversePolishNotation,memoryStore_double,3,3,1.0,
-src\main\java\com\umontreal\org\javaparser\examples\VoidVisitorStarter.java,VoidVisitorStarter,main_String[],13,17,1.3076923,
-src\main\java\com\umontreal\org\javaparser\examples\VoidVisitorStarter.java,MethodNamePrinter,visit_MethodDeclaration_Void,4,4,1.0,
-src\main\java\com\umontreal\org\javaparser\examples\VoidVisitorStarter.java,MethodNameCollector,visit_MethodDeclaration_List<String>,4,4,1.0,
+src\main\java\com\umontreal\org\javaparser\examples\VoidVisitorStarter.java,TO DO,main_String[],13,17,1.3076923,
+src\main\java\com\umontreal\org\javaparser\examples\VoidVisitorStarter.java,TO DO,visit_MethodDeclaration_Void,4,4,1.0,
+src\main\java\com\umontreal\org\javaparser\examples\VoidVisitorStarter.java,TO DO,visit_MethodDeclaration_List<String>,4,4,1.0,

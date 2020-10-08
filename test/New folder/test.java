@@ -1,13 +1,14 @@
-//test
-/*
- * a sd
- */
-
-
-
-/* asd */
-class test{
-    public static void main(String args[]){
-        System.out.println("Hello Java");
+public void test(){
+    int i = 0;
+    int i = 0;
+    int i = 0;
+    if(test){
+        while(){
+            test;
+            test;
+        }
     }
+    return test;
 }
+
+// example fait en classe chap4, p.41

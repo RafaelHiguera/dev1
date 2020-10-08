@@ -68,24 +68,20 @@ public class Main {
         int loc = 0;
         while (scanner.hasNextLine()) {
             String data = scanner.nextLine();
-            if(!data.equals("")){
-                loc++;
-            }
+            if(data.equals(""))
+                continue;
+            loc++;
         }
         return loc;
     }
 
     public static int methode_LOC(Scanner scanner){
         int loc = 0;
-        Stack<Character> stack = new Stack();
-        stack.push('{');
-        while (!stack.isEmpty()){
+        while (scanner.hasNextLine()) {
             String data = scanner.nextLine();
-            if(data.contains("}"))
-                stack.pop();
-            if(!data.equals("")){
-                loc++;
-            }
+            if(data.equals(""))
+                continue;
+            loc++;
         }
         return loc;
     }
@@ -101,13 +97,15 @@ public class Main {
     * sad
     */
     public static int classe_methode_CLOC(Scanner scanner){
-        int loc = 0;
+        int cloc = 0;
         while (scanner.hasNextLine()) {
             String data = scanner.nextLine();
+            if(data.equals(""))
+                continue;
             if(data.contains("//") || (data.contains("/*") && data.contains("*/"))){
-                loc++;
+                cloc++;
             }else if(data.contains("/*")){
-                loc++;
+                cloc++;
                 int leftComment = 1;
                 while(leftComment != 0){
                     data = scanner.nextLine();
@@ -115,21 +113,11 @@ public class Main {
                         leftComment++;
                     if(data.contains("*/"))
                         leftComment--;
-                    if(!data.equals("")){
-                        loc++;
-                    }
+                    cloc++;
                 }
             }
         }
-        return loc;
-    }
-
-    public static double classe_dc(Scanner scanner){
-        return classe_methode_CLOC(scanner) / class_LOC(scanner);
-    }
-
-    public static double methode_dc(Scanner scanner){
-        return classe_methode_CLOC(scanner) / methode_LOC(scanner);
+        return cloc;
     }
 
     public static void csvFileGenerator(String path){
@@ -163,12 +151,52 @@ public class Main {
     private static void addClassEntry(String file) throws FileNotFoundException {
         File f = new File(file);
         Scanner scanner = new Scanner(f);
-        System.out.println(class_LOC(new Scanner(f)));
-        System.out.println(classe_methode_CLOC(scanner));
+        System.out.println(Arrays.toString(ccMcCabe(scanner)));
     }
 
     private static void addMethodsEntry(String file) {
 
+    }
+
+    // [0] :  e – n + 2 ; [1] :  1 + d; [2] : r;
+    public static int[] ccMcCabe(Scanner scanner){
+        scanner.nextLine();
+        int e = 0, n = 0, d = 0, r = 1;
+        while (scanner.hasNextLine()) {
+            String data = scanner.nextLine();
+            if(data == "" || data == " " || lineDoesNotContainLetters(data) || data.substring(0,2).equals("//"))
+                continue;
+            else if(data.substring(0,2).equals("/*")){
+                while(!data.contains("*/")){
+                    data = scanner.nextLine();
+                }
+                data = scanner.nextLine();
+            }
+            n++;
+            if(!data.contains("break") || !data.contains("default") || data.contains("else") || data.contains("continue"))
+                e++;
+            if(data.contains("if") || data.contains("else if") || data.contains("switch") || data.contains("case")){
+                e++;
+                d++;
+                r++;
+            }
+            if(data.contains("while") || data.contains("for")){
+                d++;
+                r++;
+            }
+            if(!scanner.hasNextLine())
+                e--;
+        }
+        System.out.println(e+" "+n+" "+d+" "+r);
+        return new int[]{e - n + 2, 1+d, r};
+    }
+
+    private static boolean lineDoesNotContainLetters(String line){
+        for(char c : line.toCharArray()){
+            if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
+                return false;
+        }
+        return true;
     }
 
 
@@ -254,15 +282,15 @@ public class Main {
             try {
                 int beginLine = cid.getBegin().get().line;
                 scanner = new Scanner(this.file);
-                skipLines(scanner, beginLine - 2 );
+                skipLines(scanner, beginLine-2);
                 int numberOfLines = class_LOC(scanner);
                 scanner = new Scanner(this.file);
 
-                skipLines(scanner, beginLine - 2 );
+                skipLines(scanner, beginLine-2);
                 int numberOfLinesWithComment = classe_methode_CLOC(scanner);
 
                 // Create and collect ClassMetric Object
-                ClassMetric classMetric = new ClassMetric(path, className, numberOfLines, numberOfLines + numberOfLinesWithComment);
+                ClassMetric classMetric = new ClassMetric(path, className, numberOfLines, numberOfLinesWithComment);
                 collector.add(classMetric);
 
             } catch (FileNotFoundException e) {
