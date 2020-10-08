@@ -7,13 +7,11 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Stack;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.javaparser.ast.Node;
 import com.umontreal.bean.ClassMetric;
 import com.umontreal.bean.MethodMetric;
 import com.umontreal.utils.DirExplorer;
@@ -38,14 +36,14 @@ public class Main {
 
         try {
             extractMetric(projectDir, methodMetricsList, classMetricList);
-            printClassToCSV("classes.csv", "chemin,class,classe_LOC,classe_CLOC,classe_DC", classMetricList);
-            printClassToCSV("methodes.csv", "chemin,class,methode,methode_LOC,methode_CLOC,methode_DC", methodMetricsList);
+            printMetricsToCSV("classes.csv", "chemin,class,classe_LOC,classe_CLOC,classe_DC", classMetricList);
+            printMetricsToCSV("methodes.csv", "chemin,class,methode,methode_LOC,methode_CLOC,methode_DC", methodMetricsList);
         } catch (FileNotFoundException exception) {
             System.out.println("The file " + projectDir.getPath() + " was not found.");
         }
     }
 
-    public static void printClassToCSV(String fileName, String columnNames, List<?> listToPrint) {
+    public static void printMetricsToCSV(String fileName, String columnNames, List<?> listToPrint) {
         PrintWriter pw = null;
         try {
             pw = new PrintWriter(new File(fileName));
@@ -201,15 +199,16 @@ public class Main {
             super.visit(md, collector);
 
             String path = this.file.getPath();
+            String className = Objects.requireNonNull(getClass(md)).getName().asString();
             String methodName = reformatMethodName(md.getDeclarationAsString(false, false, false));
 
             Scanner scanner = new Scanner(md.getComment() + md.getDeclarationAsString() + md.getBody().get().toString());
             int numberOfLines = methode_LOC(scanner);
-            scanner = new Scanner(md.getComment() + md.getDeclarationAsString() + md.getBody().get().toString());
+            scanner = new Scanner(md.getDeclarationAsString() + md.getBody().get().toString());
             int numberOfLinesWithComment = classe_methode_CLOC(scanner);
 
             // Create and collect MethodMetric Object
-            MethodMetric methodMetric = new MethodMetric(path, methodName, numberOfLines, numberOfLines + numberOfLinesWithComment);
+            MethodMetric methodMetric = new MethodMetric(path, className, methodName, numberOfLines, numberOfLines + numberOfLinesWithComment);
             collector.add(methodMetric);
         }
 
@@ -219,6 +218,15 @@ public class Main {
             methodDeclaration = methodDeclaration.replace(", ", "_");
             methodDeclaration = methodDeclaration.replace(")", "");
             return methodDeclaration;
+        }
+
+        private static ClassOrInterfaceDeclaration getClass(Node node) {
+            while (!(node instanceof ClassOrInterfaceDeclaration)) {
+                if(node.getParentNode().isPresent()) {
+                    node = node.getParentNode().get();
+                } else return null;
+            }
+            return (ClassOrInterfaceDeclaration) node;
         }
     }
 
@@ -246,11 +254,11 @@ public class Main {
             try {
                 int beginLine = cid.getBegin().get().line;
                 scanner = new Scanner(this.file);
-                skipLines(scanner, beginLine -2 );
+                skipLines(scanner, beginLine - 2 );
                 int numberOfLines = class_LOC(scanner);
                 scanner = new Scanner(this.file);
 
-                skipLines(scanner, beginLine -2 );
+                skipLines(scanner, beginLine - 2 );
                 int numberOfLinesWithComment = classe_methode_CLOC(scanner);
 
                 // Create and collect ClassMetric Object
