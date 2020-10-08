@@ -1,7 +1,4 @@
 chemin,class,classe_LOC,classe_CLOC,classe_DC
-src\main\java\com\umontreal\org\javaparser\examples\CommentReporter.java,CommentReportEntry,20,0,0.0,
-src\main\java\com\umontreal\org\javaparser\examples\CommentReporter.java,CommentReporter,44,3,0.06818182,
-src\main\java\com\umontreal\org\javaparser\examples\ReversePolishNotation.java,ReversePolishNotation,74,17,0.22972973,
-src\main\java\com\umontreal\org\javaparser\examples\VoidVisitorStarter.java,MethodNamePrinter,20,2,0.1,
-src\main\java\com\umontreal\org\javaparser\examples\VoidVisitorStarter.java,MethodNameCollector,10,2,0.2,
-src\main\java\com\umontreal\org\javaparser\examples\VoidVisitorStarter.java,VoidVisitorStarter,43,9,0.20930232,
+src\main\java\com\umontreal\org\javaparser\examples\VoidVisitorStarter.java,MethodNamePrinter,44,9,0.20454545,
+src\main\java\com\umontreal\org\javaparser\examples\VoidVisitorStarter.java,MethodNameCollector,44,9,0.20454545,
+src\main\java\com\umontreal\org\javaparser\examples\VoidVisitorStarter.java,VoidVisitorStarter,44,9,0.20454545,

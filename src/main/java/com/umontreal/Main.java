@@ -66,9 +66,9 @@ public class Main {
         int loc = 0;
         while (scanner.hasNextLine()) {
             String data = scanner.nextLine();
-            if(!data.equals("") || !data.equals(" ")){
-                loc++;
-            }
+            if(data.equals(""))
+                continue;
+            loc++;
         }
         return loc;
     }
@@ -77,9 +77,9 @@ public class Main {
         int loc = 0;
         while (scanner.hasNextLine()) {
             String data = scanner.nextLine();
-            if(!data.equals("") || !data.equals(" ")){
-                loc++;
-            }
+            if(data.equals(""))
+                continue;
+            loc++;
         }
         return loc;
     }
@@ -98,6 +98,8 @@ public class Main {
         int cloc = 0;
         while (scanner.hasNextLine()) {
             String data = scanner.nextLine();
+            if(data.equals(""))
+                continue;
             if(data.contains("//") || (data.contains("/*") && data.contains("*/"))){
                 cloc++;
             }else if(data.contains("/*")){
@@ -109,9 +111,7 @@ public class Main {
                         leftComment++;
                     if(data.contains("*/"))
                         leftComment--;
-                    if(!data.equals("")){
-                        cloc++;
-                    }
+                    cloc++;
                 }
             }
         }
@@ -270,11 +270,11 @@ public class Main {
             try {
                 int beginLine = cid.getBegin().get().line;
                 scanner = new Scanner(this.file);
-                skipLines(scanner, beginLine -2 );
+                skipLines(scanner, beginLine-2);
                 int numberOfLines = class_LOC(scanner);
                 scanner = new Scanner(this.file);
 
-                skipLines(scanner, beginLine -2 );
+                skipLines(scanner, beginLine-2);
                 int numberOfLinesWithComment = classe_methode_CLOC(scanner);
 
                 // Create and collect ClassMetric Object
