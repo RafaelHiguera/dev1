@@ -3,15 +3,19 @@ package com.umontreal;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Stack;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.umontreal.bean.ClassMetric;
+import com.umontreal.bean.MethodMetric;
 import com.umontreal.utils.DirExplorer;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -23,15 +27,42 @@ import com.google.common.base.Strings;
 
 public class Main {
 
-    public static void main(String[] args) throws FileNotFoundException {
-        // TO DO
-        // Get file PATH from args
+    public static void main(String[] args) {
+        // Pass this in arguments for tests:
+        // "src/main/java/com/umontreal/org/javaparser/examples/"
+        String path = args[0];
+        File projectDir = new File(path);
 
-        File projectDir = new File("src/main/java/com/umontreal/org/javaparser/examples/");
-        extractMetric(projectDir);
+        List<MethodMetric> methodMetricsList = new ArrayList<>();
+        List<ClassMetric> classMetricList = new ArrayList<>();
 
-        csvFileGenerator("test");
+        try {
+            extractMetric(projectDir, methodMetricsList, classMetricList);
+            printClassToCSV("classes.csv", "chemin,class,classe_LOC,classe_CLOC,classe_DC", classMetricList);
+            printClassToCSV("methodes.csv", "chemin,class,methode,methode_LOC,methode_CLOC,methode_DC", methodMetricsList);
+        } catch (FileNotFoundException exception) {
+            System.out.println("The file " + projectDir.getPath() + " was not found.");
+        }
+    }
 
+    public static void printClassToCSV(String fileName, String columnNames, List<?> listToPrint) {
+        PrintWriter pw = null;
+        try {
+            pw = new PrintWriter(new File(fileName));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        StringBuilder builder = new StringBuilder();
+        builder.append(columnNames).append("\n");
+
+        for (Object obj: listToPrint) {
+            builder.append(obj.toString()).append(",");
+            builder.append('\n');
+        }
+
+        assert pw != null;
+        pw.write(builder.toString());
+        pw.close();
     }
 
 
@@ -143,54 +174,92 @@ public class Main {
     }
 
 
-    public static void extractMetric(File projectDir) throws FileNotFoundException {
+    public static void extractMetric(File projectDir, List<MethodMetric> methodMetricsList, List<ClassMetric> classMetricList) throws FileNotFoundException {
+
         new DirExplorer((level, path, file) -> path.endsWith(".java"), (level, path, file) -> {
-            System.out.println(path);
-            System.out.println(Strings.repeat("=", path.length()));
-
             CompilationUnit cu = StaticJavaParser.parse(file);
-            VoidVisitor<?> classVisitor = new Main.ClassVisitor();
-            classVisitor.visit(cu, null);
 
-            VoidVisitor<?> methodVisitor = new Main.MethodVisitor();
-            methodVisitor.visit(cu, null);
+            List<ClassMetric> classMetricListFromFile = new ArrayList<>();
+            VoidVisitor<List<ClassMetric>> classVisitor = new Main.ClassVisitor(file);
+            classVisitor.visit(cu, classMetricListFromFile);
+            classMetricList.addAll(classMetricListFromFile);
+
+            List<MethodMetric> methodMetricsListFromFile = new ArrayList<>();
+            VoidVisitor<List<MethodMetric>> methodVisitor = new Main.MethodVisitor(file);
+            methodVisitor.visit(cu, methodMetricsListFromFile);
+            methodMetricsList.addAll(methodMetricsListFromFile);
 
         }).explore(projectDir);
     }
 
-    private static class MethodVisitor extends VoidVisitorAdapter<Void> {
-        @Override
-        public void visit(MethodDeclaration md, Void arg) {
-            super.visit(md, arg);
-            System.out.println("Method Name Printed: " + md.getName());
-            System.out.println("line length: " + md.getRange().map(range -> range.end.line - range.begin.line + 1).orElse(0));
-            md.getComment().ifPresent(comment -> {System.out.println("JavaDoc length: " + (comment.getEnd().get().line - comment.getBegin().get().line + 1));});
+    private static class MethodVisitor extends VoidVisitorAdapter<List<MethodMetric>> {
+        private File file;
 
+        public MethodVisitor(File file) { this.file = file; }
 
-            // Pass this to LOC and CLOC functions:
-            System.out.println(md.getDeclarationAsString());
-            System.out.println(md.getBody().get());
+        public void visit(MethodDeclaration md, List<MethodMetric> collector){
+            super.visit(md, collector);
+
+            String path = this.file.getPath();
+            String methodName = reformatMethodName(md.getDeclarationAsString(false, false, false));
+
+            Scanner scanner = new Scanner(md.getComment() + md.getDeclarationAsString() + md.getBody().get().toString());
+            int numberOfLines = methode_LOC(scanner);
+            scanner = new Scanner(md.getComment() + md.getDeclarationAsString() + md.getBody().get().toString());
+            int numberOfLinesWithComment = classe_methode_CLOC(scanner);
 
             // Create and collect MethodMetric Object
+            MethodMetric methodMetric = new MethodMetric(path, methodName, numberOfLines, numberOfLines + numberOfLinesWithComment);
+            collector.add(methodMetric);
+        }
 
+        public String reformatMethodName(String methodDeclaration) {
+            methodDeclaration = methodDeclaration.split(" ", 2)[1];
+            methodDeclaration = methodDeclaration.replace("(", "_");
+            methodDeclaration = methodDeclaration.replace(", ", "_");
+            methodDeclaration = methodDeclaration.replace(")", "");
+            return methodDeclaration;
         }
     }
 
-    private static class ClassVisitor extends VoidVisitorAdapter<Void> {
+    public static void skipLines(Scanner s,int lineNum){
+        for(int i = 0; i < lineNum;i++){
+            if(s.hasNextLine())s.nextLine();
+        }
+    }
+
+    private static class ClassVisitor extends VoidVisitorAdapter<List<ClassMetric>> {
+        private File file;
+
+        public ClassVisitor(File file) {
+            this.file = file;
+        }
+
         @Override
-        public void visit(ClassOrInterfaceDeclaration cid, Void arg) {
-            super.visit(cid, arg);
-            System.out.println("Class Name Printed: " + cid.getName());
-            System.out.println("line length: " + cid.getRange().map(range -> range.end.line - range.begin.line + 1).orElse(0));
-            System.out.println("Begin: " + cid.getRange().get().begin.line);
-            System.out.println("End: " + cid.getRange().get().end.line);
-            cid.getComment().ifPresent(comment -> {System.out.println("JavaDoc length: " + (comment.getEnd().get().line - comment.getBegin().get().line + 1));});
+        public void visit(ClassOrInterfaceDeclaration cid, List<ClassMetric> collector) {
+            super.visit(cid, collector);
+            String path = this.file.getPath();
+            String className = cid.getName().asString();
 
             // Find class String and pass it to LOC and CLOC functions
+            Scanner scanner = null;
+            try {
+                int beginLine = cid.getBegin().get().line;
+                scanner = new Scanner(this.file);
+                skipLines(scanner, beginLine -2 );
+                int numberOfLines = class_LOC(scanner);
+                scanner = new Scanner(this.file);
 
+                skipLines(scanner, beginLine -2 );
+                int numberOfLinesWithComment = classe_methode_CLOC(scanner);
 
-            // Create and collect ClassMetric Object
+                // Create and collect ClassMetric Object
+                ClassMetric classMetric = new ClassMetric(path, className, numberOfLines, numberOfLines + numberOfLinesWithComment);
+                collector.add(classMetric);
 
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
