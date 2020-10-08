@@ -7,10 +7,7 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Stack;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,19 +27,7 @@ public class Main {
     public static void main(String[] args) {
         // Pass this in arguments for tests:
         // "src/main/java/com/umontreal/org/javaparser/examples/"
-        String path = args[0];
-        File projectDir = new File(path);
-
-        List<MethodMetric> methodMetricsList = new ArrayList<>();
-        List<ClassMetric> classMetricList = new ArrayList<>();
-
-        try {
-            extractMetric(projectDir, methodMetricsList, classMetricList);
-            printClassToCSV("classes.csv", "chemin,class,classe_LOC,classe_CLOC,classe_DC", classMetricList);
-            printClassToCSV("methodes.csv", "chemin,class,methode,methode_LOC,methode_CLOC,methode_DC", methodMetricsList);
-        } catch (FileNotFoundException exception) {
-            System.out.println("The file " + projectDir.getPath() + " was not found.");
-        }
+        csvFileGenerator("test");
     }
 
     public static void printClassToCSV(String fileName, String columnNames, List<?> listToPrint) {
@@ -165,8 +150,7 @@ public class Main {
     private static void addClassEntry(String file) throws FileNotFoundException {
         File f = new File(file);
         Scanner scanner = new Scanner(f);
-        System.out.println(class_LOC(new Scanner(f)));
-        System.out.println(classe_methode_CLOC(scanner));
+        System.out.println(Arrays.toString(ccMcCabe(scanner)));
     }
 
     private static void addMethodsEntry(String file) {
@@ -174,7 +158,8 @@ public class Main {
     }
 
     // [0] :  e – n + 2 ; [1] :  1 + d; [2] : r;
-    public int[] ccMcCabe(Scanner scanner){
+    public static int[] ccMcCabe(Scanner scanner){
+        scanner.nextLine();
         int e = 0, n = 0, d = 0, r = 1;
         while (scanner.hasNextLine()) {
             String data = scanner.nextLine();
@@ -194,13 +179,18 @@ public class Main {
                 d++;
                 r++;
             }
+            if(data.contains("while") || data.contains("for")){
+                d++;
+                r++;
+            }
             if(!scanner.hasNextLine())
                 e--;
         }
-
+        System.out.println(e+" "+n+" "+d+" "+r);
+        return new int[]{e - n + 2, 1+d, r};
     }
 
-    private boolean lineDoesNotContainLetters(String line){
+    private static boolean lineDoesNotContainLetters(String line){
         for(char c : line.toCharArray()){
             if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
                 return false;
