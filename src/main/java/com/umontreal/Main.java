@@ -27,7 +27,18 @@ public class Main {
     public static void main(String[] args) {
         // Pass this in arguments for tests:
         // "src/main/java/com/umontreal/org/javaparser/examples/"
-        csvFileGenerator("test");
+        File projectDir = new File("src/main/java/com/umontreal/org/javaparser/examples/");
+
+        List<MethodMetric> methodMetricsList = new ArrayList<>();
+        List<ClassMetric> classMetricList = new ArrayList<>();
+
+        try {
+            extractMetric(projectDir, methodMetricsList, classMetricList);
+            printClassToCSV("classes.csv", "chemin,class,classe_LOC,classe_CLOC,classe_DC", classMetricList);
+            printClassToCSV("methodes.csv", "chemin,class,methode,methode_LOC,methode_CLOC,methode_DC", methodMetricsList);
+        } catch (FileNotFoundException exception) {
+            System.out.println("The file " + projectDir.getPath() + " was not found.");
+        }
     }
 
     public static void printClassToCSV(String fileName, String columnNames, List<?> listToPrint) {
@@ -55,7 +66,7 @@ public class Main {
         int loc = 0;
         while (scanner.hasNextLine()) {
             String data = scanner.nextLine();
-            if(!data.equals("")){
+            if(!data.equals("") || !data.equals(" ")){
                 loc++;
             }
         }
@@ -64,13 +75,9 @@ public class Main {
 
     public static int methode_LOC(Scanner scanner){
         int loc = 0;
-        Stack<Character> stack = new Stack();
-        stack.push('{');
-        while (!stack.isEmpty()){
+        while (scanner.hasNextLine()) {
             String data = scanner.nextLine();
-            if(data.contains("}"))
-                stack.pop();
-            if(!data.equals("")){
+            if(!data.equals("") || !data.equals(" ")){
                 loc++;
             }
         }
@@ -88,13 +95,13 @@ public class Main {
     * sad
     */
     public static int classe_methode_CLOC(Scanner scanner){
-        int loc = 0;
+        int cloc = 0;
         while (scanner.hasNextLine()) {
             String data = scanner.nextLine();
             if(data.contains("//") || (data.contains("/*") && data.contains("*/"))){
-                loc++;
+                cloc++;
             }else if(data.contains("/*")){
-                loc++;
+                cloc++;
                 int leftComment = 1;
                 while(leftComment != 0){
                     data = scanner.nextLine();
@@ -103,20 +110,12 @@ public class Main {
                     if(data.contains("*/"))
                         leftComment--;
                     if(!data.equals("")){
-                        loc++;
+                        cloc++;
                     }
                 }
             }
         }
-        return loc;
-    }
-
-    public static double classe_dc(Scanner scanner){
-        return classe_methode_CLOC(scanner) / class_LOC(scanner);
-    }
-
-    public static double methode_dc(Scanner scanner){
-        return classe_methode_CLOC(scanner) / methode_LOC(scanner);
+        return cloc;
     }
 
     public static void csvFileGenerator(String path){
@@ -279,7 +278,7 @@ public class Main {
                 int numberOfLinesWithComment = classe_methode_CLOC(scanner);
 
                 // Create and collect ClassMetric Object
-                ClassMetric classMetric = new ClassMetric(path, className, numberOfLines, numberOfLines + numberOfLinesWithComment);
+                ClassMetric classMetric = new ClassMetric(path, className, numberOfLines, numberOfLinesWithComment);
                 collector.add(classMetric);
 
             } catch (FileNotFoundException e) {
