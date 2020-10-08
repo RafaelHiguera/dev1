@@ -45,6 +45,7 @@ public class VoidVisitorStarter {
     // TEST1
     private static class MethodNameCollector extends VoidVisitorAdapter<List<String>> {
         @Override
+        //Hello
         public void visit(MethodDeclaration md, List<String> collector) {
             super.visit(md, collector);
             collector.add(md.getNameAsString());
