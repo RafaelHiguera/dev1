@@ -1,14 +1,13 @@
 package com.umontreal.bean;
 
 public class ClassMetric {
-    public String path;
-    public String name;
-    public int LOC;
-    public int CLOC;
-    public float DC;
-    public int wmc;;
-    public float BC;
-
+    private final String path;
+    private final String name;
+    private final int LOC;
+    private final int CLOC;
+    private final float DC;
+    private final int wmc;
+    private final float BC;
 
     public ClassMetric(String path, String name, int LOC, int CLOC, int wmc){
         this.path = path;
@@ -22,6 +21,34 @@ public class ClassMetric {
         } else {
             this.BC = this.DC / wmc;
         }
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getLOC() {
+        return LOC;
+    }
+
+    public int getCLOC() {
+        return CLOC;
+    }
+
+    public float getDC() {
+        return DC;
+    }
+
+    public int getWmc() {
+        return wmc;
+    }
+
+    public float getBC() {
+        return BC;
     }
 
     @Override

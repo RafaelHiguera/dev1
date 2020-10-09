@@ -2,33 +2,22 @@ package com.umontreal;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import com.github.javaparser.ast.Node;
 import com.umontreal.bean.ClassMetric;
-import com.umontreal.bean.IMetric;
 import com.umontreal.bean.MethodMetric;
-import com.umontreal.utils.DirExplorer;
+import com.umontreal.utils.*;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitor;
-import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
-import com.google.common.base.Strings;
+import com.umontreal.visitor.ClassVisitor;
+import com.umontreal.visitor.MethodVisitor;
 
 public class Main {
 
     public static void main(String[] args) {
         // Pass this in arguments for tests:
-        // "src/main/java/com/umontreal/org/javaparser/examples/"
+        // "test/org/javaparser/examples/"
         String path = args[0];
         File projectDir = new File(path);
 
@@ -37,166 +26,11 @@ public class Main {
 
         try {
             extractMetric(projectDir, methodMetricsList, classMetricList);
-            printMetricsToCSV("classes.csv", "chemin,class,classe_LOC,classe_CLOC,classe_DC,WMC,classe_BC", classMetricList);
-            printMetricsToCSV("methodes.csv", "chemin,class,methode,methode_LOC,methode_CLOC,methode_DC,CC,methode_BC", methodMetricsList);
+            CsvPrinter.printMetricsToCSV("classes.csv", "chemin,class,classe_LOC,classe_CLOC,classe_DC,WMC,classe_BC", classMetricList);
+            CsvPrinter.printMetricsToCSV("methodes.csv", "chemin,class,methode,methode_LOC,methode_CLOC,methode_DC,CC,methode_BC", methodMetricsList);
         } catch (FileNotFoundException exception) {
             System.out.println("The file " + projectDir.getPath() + " was not found.");
         }
-    }
-
-    public static void printMetricsToCSV(String fileName, String columnNames, List<?> listToPrint) {
-        PrintWriter pw = null;
-        try {
-            pw = new PrintWriter(new File(fileName));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        StringBuilder builder = new StringBuilder();
-        builder.append(columnNames).append("\n");
-
-        for (Object obj: listToPrint) {
-            builder.append(obj.toString()).append(",");
-            builder.append('\n');
-        }
-
-        assert pw != null;
-        pw.write(builder.toString());
-        pw.close();
-    }
-
-    public static int class_LOC(Scanner scanner){
-        int loc = 0;
-        while (scanner.hasNextLine()) {
-            String data = scanner.nextLine();
-            if(data.equals(""))
-                continue;
-            loc++;
-        }
-        return loc;
-    }
-
-    public static int methode_LOC(Scanner scanner){
-        int loc = 0;
-        while (scanner.hasNextLine()) {
-            String data = scanner.nextLine();
-            if(data.equals(""))
-                continue;
-            loc++;
-        }
-        return loc;
-    }
-
-    //asddsa
-    //asdasd
-    /*
-    * a sd
-    * asd asd
-    * asd
-    *
-    * asd asd
-    * sad
-    */
-    public static int classe_methode_CLOC(Scanner scanner){
-        int cloc = 0;
-        while (scanner.hasNextLine()) {
-            String data = scanner.nextLine();
-            if(data.equals(""))
-                continue;
-            if(data.contains("//") || (data.contains("/*") && data.contains("*/"))){
-                cloc++;
-            }else if(data.contains("/*")){
-                cloc++;
-                int leftComment = 1;
-                while(leftComment != 0){
-                    data = scanner.nextLine();
-                    if(data.contains("/*"))
-                        leftComment++;
-                    if(data.contains("*/"))
-                        leftComment--;
-                    cloc++;
-                }
-            }
-        }
-        return cloc;
-    }
-
-    public static void csvFileGenerator(String path){
-        createCsvFiles("classes");
-        createCsvFiles("methodes");
-        try (Stream<Path> walk = Files.walk(Paths.get(path))) {
-            List<String> result = walk.filter(Files::isRegularFile)
-                    .map(x -> x.toString()).collect(Collectors.toList());
-
-            for(String file : result){
-                if(file.substring(file.length()-4,file.length()).equals("java")){
-                    addClassEntry(file);
-                    addMethodsEntry(file);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void createCsvFiles(String fileName) {
-        try {
-            File file = new File(fileName+".csv");
-            file.createNewFile();
-        } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-        }
-    }
-
-    private static void addClassEntry(String file) throws FileNotFoundException {
-        File f = new File(file);
-        Scanner scanner = new Scanner(f);
-        System.out.println(Arrays.toString(ccMcCabe(scanner)));
-    }
-
-    private static void addMethodsEntry(String file) {
-
-    }
-
-    // [0] :  e – n + 2 ; [1] :  1 + d; [2] : r;
-    public static int[] ccMcCabe(Scanner scanner){
-        scanner.nextLine();
-        int e = 0, n = 0, d = 0, r = 1;
-        while (scanner.hasNextLine()) {
-            String data = scanner.nextLine();
-            if(data.equals("") || data.equals(" ") || lineDoesNotContainLetters(data) || data.substring(0,2).equals("//"))
-                continue;
-            else if(data.substring(0,2).equals("/*")){
-                while(!data.contains("*/")){
-                    data = scanner.nextLine();
-                }
-                data = scanner.nextLine();
-            }
-            n++;
-            if(!data.contains("break") || !data.contains("default") || data.contains("else") || data.contains("continue"))
-                e++;
-            if(data.contains("if") || data.contains("else if") || data.contains("switch") || data.contains("case")){
-                e++;
-                d++;
-                r++;
-            }
-            if(data.contains("while") || data.contains("for")){
-                d++;
-                r++;
-            }
-            if(!scanner.hasNextLine())
-                e--;
-        }
-        System.out.println(e+" "+n+" "+d+" "+r);
-        return new int[]{e - n + 2, 1+d, r};
-    }
-
-    private static boolean lineDoesNotContainLetters(String line){
-        for(char c : line.toCharArray()){
-            if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
-                return false;
-        }
-        return true;
     }
 
     public static void extractMetric(File projectDir, List<MethodMetric> methodMetricsList, List<ClassMetric> classMetricList) throws FileNotFoundException {
@@ -204,104 +38,15 @@ public class Main {
             CompilationUnit cu = StaticJavaParser.parse(file);
 
             List<ClassMetric> classMetricListFromFile = new ArrayList<>();
-            VoidVisitor<List<ClassMetric>> classVisitor = new Main.ClassVisitor(file);
+            VoidVisitor<List<ClassMetric>> classVisitor = new ClassVisitor(file);
             classVisitor.visit(cu, classMetricListFromFile);
             classMetricList.addAll(classMetricListFromFile);
 
             List<MethodMetric> methodMetricsListFromFile = new ArrayList<>();
-            VoidVisitor<List<MethodMetric>> methodVisitor = new Main.MethodVisitor(file);
+            VoidVisitor<List<MethodMetric>> methodVisitor = new MethodVisitor(file);
             methodVisitor.visit(cu, methodMetricsListFromFile);
             methodMetricsList.addAll(methodMetricsListFromFile);
 
         }).explore(projectDir);
-    }
-
-    private static class MethodVisitor extends VoidVisitorAdapter<List<MethodMetric>> {
-        private File file;
-
-        public MethodVisitor(File file) { this.file = file; }
-
-        public void visit(MethodDeclaration md, List<MethodMetric> collector){
-            super.visit(md, collector);
-
-            String path = this.file.getPath();
-            String className = Objects.requireNonNull(getClass(md)).getName().asString();
-            String methodName = reformatMethodName(md.getDeclarationAsString(false, false, false));
-
-            Scanner scanner = new Scanner(md.getDeclarationAsString() + md.getBody().get().toString());
-            int numberOfLines = methode_LOC(scanner);
-            scanner = new Scanner(md.getDeclarationAsString() + md.getBody().get().toString());
-            int numberOfLinesWithComment = classe_methode_CLOC(scanner);
-            scanner = new Scanner(md.getDeclarationAsString() + md.getBody().get().toString());
-            int[] cc = ccMcCabe(scanner);
-
-            // Create and collect MethodMetric Object
-            MethodMetric methodMetric = new MethodMetric(path, className, methodName, numberOfLines, numberOfLinesWithComment, cc);
-            collector.add(methodMetric);
-        }
-
-        public String reformatMethodName(String methodDeclaration) {
-            methodDeclaration = methodDeclaration.split(" ", 2)[1];
-            methodDeclaration = methodDeclaration.replace("(", "_");
-            methodDeclaration = methodDeclaration.replace(", ", "_");
-            methodDeclaration = methodDeclaration.replace(")", "");
-            return methodDeclaration;
-        }
-
-        private static ClassOrInterfaceDeclaration getClass(Node node) {
-            while (!(node instanceof ClassOrInterfaceDeclaration)) {
-                if(node.getParentNode().isPresent()) {
-                    node = node.getParentNode().get();
-                } else return null;
-            }
-            return (ClassOrInterfaceDeclaration) node;
-        }
-    }
-
-    public static void skipLines(Scanner s,int lineNum){
-        for(int i = 0; i < lineNum;i++){
-            if(s.hasNextLine())s.nextLine();
-        }
-    }
-
-    private static class ClassVisitor extends VoidVisitorAdapter<List<ClassMetric>> {
-        private File file;
-
-        public ClassVisitor(File file) {
-            this.file = file;
-        }
-
-        @Override
-        public void visit(ClassOrInterfaceDeclaration cid, List<ClassMetric> collector) {
-            super.visit(cid, collector);
-            String path = this.file.getPath();
-            String className = cid.getName().asString();
-
-            // Find class String and pass it to LOC and CLOC functions
-            Scanner scanner = null;
-            try {
-                int beginLine = cid.getBegin().get().line;
-                scanner = new Scanner(this.file);
-                skipLines(scanner, beginLine-2);
-                int numberOfLines = class_LOC(scanner);
-                scanner = new Scanner(this.file);
-
-                skipLines(scanner, beginLine-2);
-                int numberOfLinesWithComment = classe_methode_CLOC(scanner);
-
-                int wmc = 0;
-                for (MethodDeclaration method: cid.getMethods()) {
-                    scanner = new Scanner(method.toString());
-                    wmc += ccMcCabe(scanner)[IMetric.methodInUseCC];
-                }
-
-                // Create and collect ClassMetric Object
-                ClassMetric classMetric = new ClassMetric(path, className, numberOfLines, numberOfLinesWithComment, wmc);
-                collector.add(classMetric);
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
     }
 }

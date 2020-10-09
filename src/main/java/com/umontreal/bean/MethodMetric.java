@@ -2,15 +2,14 @@ package com.umontreal.bean;
 
 public class MethodMetric {
 
-    public String path;
-    public String className;
-    public String name;
-    public int LOC;
-    public int CLOC;
-    public float DC;
-    public  int[] CC;
-    public float BC;
-
+    private final String path;
+    private final String className;
+    private final String name;
+    private final int LOC;
+    private final int CLOC;
+    private final float DC;
+    private final int[] CC;
+    private final float BC;
 
     public MethodMetric(String path, String className, String name, int LOC, int CLOC, int[] CC){
         this.path = path;
@@ -25,6 +24,38 @@ public class MethodMetric {
         } else {
             this.BC = this.DC / CC[IMetric.methodInUseCC];
         }
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getLOC() {
+        return LOC;
+    }
+
+    public int getCLOC() {
+        return CLOC;
+    }
+
+    public float getDC() {
+        return DC;
+    }
+
+    public int[] getCC() {
+        return CC;
+    }
+
+    public float getBC() {
+        return BC;
     }
 
     @Override

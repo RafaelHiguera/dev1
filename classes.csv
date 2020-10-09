@@ -1,4 +1,7 @@
-chemin,class,classe_LOC,classe_CLOC,classe_DC
-src\main\java\com\umontreal\org\javaparser\examples\VoidVisitorStarter.java,MethodNamePrinter,44,9,0.20454545,
-src\main\java\com\umontreal\org\javaparser\examples\VoidVisitorStarter.java,MethodNameCollector,44,9,0.20454545,
-src\main\java\com\umontreal\org\javaparser\examples\VoidVisitorStarter.java,VoidVisitorStarter,44,9,0.20454545,
+chemin,class,classe_LOC,classe_CLOC,classe_DC,WMC,classe_BC
+test\org\javaparser\examples\CommentReporter.java,CommentReportEntry,17,0,0.0,2,0.0,
+test\org\javaparser\examples\CommentReporter.java,CommentReporter,33,3,0.09090909,2,0.045454547,
+test\org\javaparser\examples\ReversePolishNotation.java,ReversePolishNotation,64,17,0.265625,13,0.020432692,
+test\org\javaparser\examples\VoidVisitorStarter.java,MethodNamePrinter,18,2,0.11111111,2,0.055555556,
+test\org\javaparser\examples\VoidVisitorStarter.java,MethodNameCollector,10,2,0.2,2,0.1,
+test\org\javaparser\examples\VoidVisitorStarter.java,VoidVisitorStarter,36,9,0.25,2,0.125,
