@@ -27,6 +27,10 @@ public class Main {
      * args[0] is the path of the folder
      */
     public static void main(String[] args) {
+        if (args.length == 0) {
+            System.out.println("Enter directory path as argument");
+            return;
+        }
         String path = args[0];
         File projectDir = new File(path);
 

@@ -1,2 +1,4 @@
 # dev1
-devoir 1
+Auteurs:  \
+Marc-André Brochu \
+Rafael Higuera
