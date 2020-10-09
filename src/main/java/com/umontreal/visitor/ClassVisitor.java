@@ -1,5 +1,6 @@
 package com.umontreal.visitor;
 
+import com.github.javaparser.Range;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
@@ -31,16 +32,34 @@ public class ClassVisitor extends VoidVisitorAdapter<List<ClassMetric>> {
 
         // Find class String and pass it to MetricExtractor functions
         Scanner scanner;
-        try {
-            int beginLine = cid.getBegin().get().line;
-            scanner = new Scanner(this.file);
-            MetricExtractor.skipLines(scanner, beginLine-2);
-            int numberOfLines = MetricExtractor.class_LOC(scanner);
-            scanner = new Scanner(this.file);
+        int beginLine = 0;
+        if (cid.getBegin().isPresent()) {
+            beginLine = cid.getBegin().get().line;
+        }
 
-            MetricExtractor.skipLines(scanner, beginLine-2);
+        // Where to class start in the file, if its the main class start at the beginning of file
+        int linesToSkip = 0;
+        if (cid.isNestedType()) {
+            linesToSkip = beginLine-1;
+            if (cid.getComment().isPresent()) {
+                Range commentRange =  cid.getComment().get().getRange().get();
+                int commentCorrection = commentRange.end.line - commentRange.begin.line + 1;
+                linesToSkip = linesToSkip - commentCorrection;
+            }
+        }
+
+        try {
+            // LOC
+            scanner = new Scanner(this.file);
+            MetricExtractor.skipLines(scanner, linesToSkip);
+            int numberOfLines = MetricExtractor.class_LOC(scanner);
+
+            // CLOC
+            scanner = new Scanner(this.file);
+            MetricExtractor.skipLines(scanner, linesToSkip);
             int numberOfLinesWithComment = MetricExtractor.class_method_CLOC(scanner);
 
+            // WMC: Sum of CC for each method in class
             int wmc = 0;
             for (MethodDeclaration method: cid.getMethods()) {
                 scanner = new Scanner(method.toString());

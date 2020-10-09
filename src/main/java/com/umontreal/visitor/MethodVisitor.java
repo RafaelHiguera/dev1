@@ -29,11 +29,25 @@ public class MethodVisitor extends VoidVisitorAdapter<List<MethodMetric>> {
         String className = Objects.requireNonNull(getClass(md)).getName().asString();
         String methodName = reformatMethodName(md.getDeclarationAsString(false, false, false));
 
-        Scanner scanner = new Scanner(md.getDeclarationAsString() + md.getBody().get().toString());
+        String methodImplementation = "";
+        if (md.getComment().isPresent()) {
+            methodImplementation = md.getComment().get().toString();
+        }
+        methodImplementation = methodImplementation + md.getDeclarationAsString();
+        if (md.getBody().isPresent()) {
+            methodImplementation = methodImplementation + md.getBody().get().toString();
+        }
+
+        // LOC
+        Scanner scanner = new Scanner(methodImplementation);
         int numberOfLines = MetricExtractor.method_LOC(scanner);
-        scanner = new Scanner(md.getDeclarationAsString() + md.getBody().get().toString());
+
+        // CLOC
+        scanner = new Scanner(methodImplementation);
         int numberOfLinesWithComment = MetricExtractor.class_method_CLOC(scanner);
-        scanner = new Scanner(md.getDeclarationAsString() + md.getBody().get().toString());
+
+        // CC
+        scanner = new Scanner(methodImplementation);
         int[] cc = MetricExtractor.ccMcCabe(scanner);
 
         // Create and collect MethodMetric Object
