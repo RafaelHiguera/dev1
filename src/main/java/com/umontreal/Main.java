@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 
 import com.github.javaparser.ast.Node;
 import com.umontreal.bean.ClassMetric;
+import com.umontreal.bean.IMetric;
 import com.umontreal.bean.MethodMetric;
 import com.umontreal.utils.DirExplorer;
 import com.github.javaparser.StaticJavaParser;
@@ -36,8 +37,8 @@ public class Main {
 
         try {
             extractMetric(projectDir, methodMetricsList, classMetricList);
-            printMetricsToCSV("classes.csv", "chemin,class,classe_LOC,classe_CLOC,classe_DC", classMetricList);
-            printMetricsToCSV("methodes.csv", "chemin,class,methode,methode_LOC,methode_CLOC,methode_DC", methodMetricsList);
+            printMetricsToCSV("classes.csv", "chemin,class,classe_LOC,classe_CLOC,classe_DC,WMC,classe_BC", classMetricList);
+            printMetricsToCSV("methodes.csv", "chemin,class,methode,methode_LOC,methode_CLOC,methode_DC,CC,methode_BC", methodMetricsList);
         } catch (FileNotFoundException exception) {
             System.out.println("The file " + projectDir.getPath() + " was not found.");
         }
@@ -62,7 +63,6 @@ public class Main {
         pw.write(builder.toString());
         pw.close();
     }
-
 
     public static int class_LOC(Scanner scanner){
         int loc = 0;
@@ -164,7 +164,7 @@ public class Main {
         int e = 0, n = 0, d = 0, r = 1;
         while (scanner.hasNextLine()) {
             String data = scanner.nextLine();
-            if(data == "" || data == " " || lineDoesNotContainLetters(data) || data.substring(0,2).equals("//"))
+            if(data.equals("") || data.equals(" ") || lineDoesNotContainLetters(data) || data.substring(0,2).equals("//"))
                 continue;
             else if(data.substring(0,2).equals("/*")){
                 while(!data.contains("*/")){
@@ -199,9 +199,7 @@ public class Main {
         return true;
     }
 
-
     public static void extractMetric(File projectDir, List<MethodMetric> methodMetricsList, List<ClassMetric> classMetricList) throws FileNotFoundException {
-
         new DirExplorer((level, path, file) -> path.endsWith(".java"), (level, path, file) -> {
             CompilationUnit cu = StaticJavaParser.parse(file);
 
@@ -230,13 +228,15 @@ public class Main {
             String className = Objects.requireNonNull(getClass(md)).getName().asString();
             String methodName = reformatMethodName(md.getDeclarationAsString(false, false, false));
 
-            Scanner scanner = new Scanner(md.getComment() + md.getDeclarationAsString() + md.getBody().get().toString());
+            Scanner scanner = new Scanner(md.getDeclarationAsString() + md.getBody().get().toString());
             int numberOfLines = methode_LOC(scanner);
             scanner = new Scanner(md.getDeclarationAsString() + md.getBody().get().toString());
             int numberOfLinesWithComment = classe_methode_CLOC(scanner);
+            scanner = new Scanner(md.getDeclarationAsString() + md.getBody().get().toString());
+            int[] cc = ccMcCabe(scanner);
 
             // Create and collect MethodMetric Object
-            MethodMetric methodMetric = new MethodMetric(path, className, methodName, numberOfLines, numberOfLines + numberOfLinesWithComment);
+            MethodMetric methodMetric = new MethodMetric(path, className, methodName, numberOfLines, numberOfLinesWithComment, cc);
             collector.add(methodMetric);
         }
 
@@ -289,8 +289,14 @@ public class Main {
                 skipLines(scanner, beginLine-2);
                 int numberOfLinesWithComment = classe_methode_CLOC(scanner);
 
+                int wmc = 0;
+                for (MethodDeclaration method: cid.getMethods()) {
+                    scanner = new Scanner(method.toString());
+                    wmc += ccMcCabe(scanner)[IMetric.methodInUseCC];
+                }
+
                 // Create and collect ClassMetric Object
-                ClassMetric classMetric = new ClassMetric(path, className, numberOfLines, numberOfLinesWithComment);
+                ClassMetric classMetric = new ClassMetric(path, className, numberOfLines, numberOfLinesWithComment, wmc);
                 collector.add(classMetric);
 
             } catch (FileNotFoundException e) {
