@@ -1,11 +1,12 @@
 package com.umontreal.utils;
 
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Objects;
 
-/*
+/**
+ * The class DirExplorer.
+ * Explore recursively all the files in the directory.
  * Source :
  * https://tomassetti.me/getting-started-with-javaparser-analyzing-java-code-programmatically/
  */

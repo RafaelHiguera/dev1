@@ -1,5 +1,9 @@
 package com.umontreal.bean;
 
+/**
+ * The class ClassMetric
+ * Contains and compute all the metrics relevant to a Java class.
+ */
 public class ClassMetric {
     private final String path;
     private final String name;

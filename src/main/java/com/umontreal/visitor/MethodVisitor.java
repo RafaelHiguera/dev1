@@ -12,6 +12,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
+/**
+ * The type MethodVisitor.
+ * Visit all method in file create a methodMetric object for each of them and store it in the collector.
+ */
 public class MethodVisitor extends VoidVisitorAdapter<List<MethodMetric>> {
     private final File file;
 

@@ -2,8 +2,19 @@ package com.umontreal.utils;
 
 import java.util.Scanner;
 
+/**
+ * The type Metric extractor.
+ * Contains helpers methods to compute metrics.
+ */
 public class MetricExtractor {
 
+    /**
+     * Class LOC.
+     * Compute the number of lines of code of a class.
+     *
+     * @param scanner the scanner
+     * @return int lines of code
+     */
     public static int class_LOC(Scanner scanner){
         int loc = 0;
         while (scanner.hasNextLine()) {
@@ -15,6 +26,13 @@ public class MetricExtractor {
         return loc;
     }
 
+    /**
+     * Method LOC.
+     * Compute the number of lines of code of a method.
+     *
+     * @param scanner the scanner
+     * @return int lines of code
+     */
     public static int method_LOC(Scanner scanner){
         int loc = 0;
         while (scanner.hasNextLine()) {
@@ -26,6 +44,13 @@ public class MetricExtractor {
         return loc;
     }
 
+    /**
+     * Class and method CLOC.
+     * Compute the number of lines of comment.
+     *
+     * @param scanner the scanner
+     * @return int lines of comment
+     */
     public static int class_method_CLOC(Scanner scanner){
         int cloc = 0;
         while (scanner.hasNextLine()) {
@@ -50,7 +75,13 @@ public class MetricExtractor {
         return cloc;
     }
 
-    // [0] :  e – n + 2 ; [1] :  1 + d; [2] : r;
+    /**
+     * ccMcCabe.
+     * Compute the Cyclomatic complexity of McCabe of a method in three different ways.
+     *
+     * @param scanner the scanner
+     * @return int[] where [0] :  e – n + 2; [1] :  1 + d; [2] : r;
+     */
     public static int[] ccMcCabe(Scanner scanner){
         scanner.nextLine();
         int e = 0, n = 0, d = 0, r = 1;
@@ -79,7 +110,6 @@ public class MetricExtractor {
             if(!scanner.hasNextLine())
                 e--;
         }
-//        System.out.println(e+" "+n+" "+d+" "+r);
         return new int[]{e - n + 2, 1+d, r};
     }
 
@@ -91,9 +121,17 @@ public class MetricExtractor {
         return true;
     }
 
-    public static void skipLines(Scanner s,int lineNum){
+    /**
+     * Advance a scanner of lineNum lines.
+     *
+     * @param scanner the scanner
+     * @param lineNum the number of lines to skip
+     */
+    public static void skipLines(Scanner scanner,int lineNum){
         for(int i = 0; i < lineNum;i++){
-            if(s.hasNextLine())s.nextLine();
+            if(scanner.hasNextLine()) {
+                scanner.nextLine();
+            }
         }
     }
 }

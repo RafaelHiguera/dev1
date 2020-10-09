@@ -1,7 +1,10 @@
 package com.umontreal.bean;
 
+/**
+ * The class MethodMetric
+ * Contains and compute all the metrics relevant to a Java method.
+ */
 public class MethodMetric {
-
     private final String path;
     private final String className;
     private final String name;

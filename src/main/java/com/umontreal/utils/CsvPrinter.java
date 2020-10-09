@@ -5,8 +5,20 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.List;
 
+/**
+ * The Class CsvPrinter.
+ * Contains helper method to print to a csv file.
+ */
 public class CsvPrinter {
 
+    /**
+     * Print metrics to csv.
+     * The toString() method of the objects in the listToPrint must be csv friendly.
+     *
+     * @param fileName    the file name
+     * @param columnNames the column names
+     * @param listToPrint the list to print
+     */
     public static void printMetricsToCSV(String fileName, String columnNames, List<?> listToPrint) {
         PrintWriter pw = null;
         try {

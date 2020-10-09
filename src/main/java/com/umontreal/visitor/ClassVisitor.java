@@ -12,6 +12,10 @@ import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * The type ClassVisitor.
+ * Visit all class in file create a classMetric object for each of them and store it in the collector.
+ */
 public class ClassVisitor extends VoidVisitorAdapter<List<ClassMetric>> {
     private final File file;
 
