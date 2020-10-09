@@ -40,6 +40,7 @@ public class Main {
             extractMetric(projectDir, methodMetricsList, classMetricList);
             CsvPrinter.printMetricsToCSV(properties.getProperty("classFileName"), properties.getProperty("classColumnName"), classMetricList);
             CsvPrinter.printMetricsToCSV(properties.getProperty("methodFileName"), properties.getProperty("methodColumnName"), methodMetricsList);
+            System.out.println("Extraction complete");
         } catch (FileNotFoundException exception) {
             System.out.println("The file " + projectDir.getPath() + " was not found.");
         } catch (IOException e) {
@@ -56,7 +57,10 @@ public class Main {
      * @throws FileNotFoundException the file not found exception
      */
     public static void extractMetric(File projectDir, List<MethodMetric> methodMetricsList, List<ClassMetric> classMetricList) throws FileNotFoundException {
+        System.out.println("Starting metric extraction on " + projectDir.getName());
         new DirExplorer((level, path, file) -> path.endsWith(".java"), (level, path, file) -> {
+            System.out.println("Parsing: " + file.getName());
+
             CompilationUnit cu = StaticJavaParser.parse(file);
 
             List<ClassMetric> classMetricListFromFile = new ArrayList<>();

@@ -9,7 +9,6 @@ import com.umontreal.utils.MetricExtractor;
 
 import java.io.File;
 import java.util.List;
-import java.util.Objects;
 import java.util.Scanner;
 
 /**
@@ -26,7 +25,12 @@ public class MethodVisitor extends VoidVisitorAdapter<List<MethodMetric>> {
         super.visit(md, collector);
 
         String path = this.file.getPath();
-        String className = Objects.requireNonNull(getClass(md)).getName().asString();
+
+        String className = "";
+        ClassOrInterfaceDeclaration parentClass = getClass(md);
+        if (parentClass != null) {
+            className = parentClass.getName().asString();
+        }
         String methodName = reformatMethodName(md.getDeclarationAsString(false, false, false));
 
         String methodImplementation = "";
