@@ -1,9 +1,6 @@
 package com.umontreal;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 import com.umontreal.bean.ClassMetric;
@@ -37,18 +34,15 @@ public class Main {
         List<MethodMetric> methodMetricsList = new ArrayList<>();
         List<ClassMetric> classMetricList = new ArrayList<>();
 
-        Properties properties = new Properties();
         try {
-            properties.load(new FileInputStream("dev1.properties"));
 
             extractMetric(projectDir, methodMetricsList, classMetricList);
-            CsvPrinter.printMetricsToCSV(properties.getProperty("classFileName"), properties.getProperty("classColumnName"), classMetricList);
-            CsvPrinter.printMetricsToCSV(properties.getProperty("methodFileName"), properties.getProperty("methodColumnName"), methodMetricsList);
+            CsvPrinter.printMetricsToCSV("classes.csv", "chemin,class,classe_LOC,classe_CLOC,classe_DC,WMC,classe_BC", classMetricList);
+            CsvPrinter.printMetricsToCSV("methodes.csv", "chemin,class,methode,methode_LOC,methode_CLOC,methode_DC,CC,methode_BC", methodMetricsList);
             System.out.println("Extraction complete");
         } catch (FileNotFoundException exception) {
             System.out.println("The file " + projectDir.getPath() + " was not found.");
-        } catch (IOException e) {
-            System.out.println("Error when loading dev1.properties");
+            System.out.println(Arrays.toString(exception.getStackTrace()));
         }
     }
 
@@ -63,7 +57,7 @@ public class Main {
     public static void extractMetric(File projectDir, List<MethodMetric> methodMetricsList, List<ClassMetric> classMetricList) throws FileNotFoundException {
         System.out.println("Starting metric extraction on " + projectDir.getName());
         new DirExplorer((level, path, file) -> path.endsWith(".java"), (level, path, file) -> {
-            System.out.println("Parsing: " + file.getName());
+//            System.out.println("Parsing: " + file.getName());
 
             CompilationUnit cu = StaticJavaParser.parse(file);
 

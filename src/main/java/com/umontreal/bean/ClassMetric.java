@@ -1,5 +1,7 @@
 package com.umontreal.bean;
 
+import java.text.DecimalFormat;
+
 /**
  * The class ClassMetric
  * Contains and compute all the metrics relevant to a Java class.
@@ -23,7 +25,7 @@ public class ClassMetric {
         if (wmc == 0) {
             this.BC = 0;
         } else {
-            this.BC = this.DC / wmc;
+            this.BC =  this.DC / wmc;
         }
     }
 
@@ -57,6 +59,6 @@ public class ClassMetric {
 
     @Override
     public String toString() {
-        return  path+","+name+","+LOC+","+CLOC+","+DC+","+wmc+","+BC;
+        return  path+","+name+","+LOC+","+CLOC+","+DC+","+wmc+","+ new DecimalFormat("##.####").format(BC);
     }
 }
